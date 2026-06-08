@@ -15,30 +15,24 @@ def create_gaussian_kernel(kernel_size, sigma):
     kernel = np.zeros((kernel_size, kernel_size), dtype=np.float64)
     center = kernel_size // 2
     sum_val = 0.0
-    
     for i in range(kernel_size):
         for j in range(kernel_size):
             x = i - center
             y = j - center
             # 高斯公式
             kernel[i, j] = math.exp(-(x**2 + y**2) / (2 * (sigma**2)))
-            sum_val += kernel[i, j]
-            
+            sum_val += kernel[i, j]  
     # 归一化，确保所有权重之和为 1
     return kernel / sum_val
-
 def gaussian_filter(img, kernel_size, sigma):
     #手动实现高斯滤波
     h, w, c = img.shape
     pad_size = kernel_size // 2
     padded_img = padding(img, pad_size)
-    
     # 初始化输出图像
     output = np.zeros_like(img, dtype=np.float64)
-    
     # 生成高斯核
     kernel = create_gaussian_kernel(kernel_size, sigma)
-    
     # 遍历图像的每个像素和通道
     for ch in range(c):
         for i in range(h):
