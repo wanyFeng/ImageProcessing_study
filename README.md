@@ -12,7 +12,7 @@
 | 2. 颜色空间 | RGB、HSV、Lab、YCbCr，颜色空间正反变换，颜色传递 | [学习笔记](2ColorSpace/2颜色空间转换.md) · [RGB-HSV](2ColorSpace/code/RGB--HSV.py) · [RGB-Lab](2ColorSpace/code/RGB--Lab.py) · [颜色传递](2ColorSpace/colortransfer/colortransfer.py) |
 | 3. 图像直方图 | 直方图绘制、直方图均衡化、直方图匹配 | [学习笔记](3histogram/histogram.md) · [代码目录](3histogram/code) |
 | 4. 图像滤波 | 方框、均值、高斯、中值和双边滤波 | [学习笔记](4ImageFiltering/filtering.md) · [代码目录](4ImageFiltering/code) |
-| 5. 特征提取 | Canny 原理与手写实现；SIFT 学习内容待补充 | [学习笔记](5FeatureExtraction/FeatureExtraction.md) · [手写 Canny](5FeatureExtraction/Canny.py) |
+| 5. 特征提取 | Canny 与 SIFT 原理及手写实现 | [学习笔记](5FeatureExtraction/FeatureExtraction.md) · [手写 Canny](5FeatureExtraction/code/Canny.py) · [手写 SIFT](5FeatureExtraction/code/SIFT.py) |
 
 ## 已实现算法
 
@@ -59,7 +59,7 @@ cd ImageProcessing_study
 运行手写 Canny 边缘检测：
 
 ```bash
-python 5FeatureExtraction/Canny.py
+python 5FeatureExtraction/code/Canny.py
 ```
 
 程序读取 `1image_processing/code/bird.jpg`，并将结果保存为 `5FeatureExtraction/bird_canny.jpg`。

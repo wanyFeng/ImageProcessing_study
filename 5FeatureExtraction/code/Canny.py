@@ -188,8 +188,8 @@ def manual_canny(input_path, output_path, low_threshold=80, high_threshold=160):
 if __name__ == "__main__":
     # 固定输入、输出路径
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    input_path = os.path.join(current_dir, "..", "1image_processing", "code", "bird.jpg")
-    output_path = os.path.join(current_dir, "bird_canny.jpg")
+    input_path = os.path.join(current_dir, "..", "..", "1image_processing", "code", "bird.jpg")
+    output_path = os.path.join(current_dir, "..", "bird_canny.jpg")
 
     manual_canny(input_path, output_path, low_threshold=80, high_threshold=160)
     print("Canny edge image saved to: " + output_path)
