@@ -1,7 +1,6 @@
 import cv2
 import SIFT
 
-
 def extract_keypoints(image):
     # 调用项目内手写的 SIFT 各步骤，获得关键点及 128 维描述子。
     gray = SIFT.to_grayscale(image)
@@ -19,7 +18,6 @@ def extract_keypoints(image):
         point["original_y"] = int(point["y"] * factor)
     return keypoints
 
-
 def descriptor_distance(first, second):
     # 使用描述子之间的欧氏距离衡量两个关键点的相似程度。
     total = 0.0
@@ -28,13 +26,11 @@ def descriptor_distance(first, second):
         total += difference * difference
     return SIFT.square_root(total)
 
-
 def find_two_nearest(query, candidates):
     best_index = -1
     second_index = -1
     best_distance = 1000000.0
     second_distance = 1000000.0
-
     for index in range(len(candidates)):
         distance = descriptor_distance(query["descriptor"], candidates[index]["descriptor"])
         if distance < best_distance:
@@ -45,9 +41,7 @@ def find_two_nearest(query, candidates):
         elif distance < second_distance:
             second_distance = distance
             second_index = index
-
     return best_index, best_distance, second_index, second_distance
-
 
 def best_match_index(query, candidates):
     best_index = -1
@@ -59,7 +53,6 @@ def best_match_index(query, candidates):
             best_index = index
     return best_index
 
-
 def match_keypoints(first_points, second_points, ratio_threshold=0.82):
     candidate_matches = []
     for first_index in range(len(first_points)):
@@ -68,16 +61,13 @@ def match_keypoints(first_points, second_points, ratio_threshold=0.82):
         )
         if best_index < 0 or second_distance <= 0.000001:
             continue
-
         # Lowe 比值检验：最近邻必须明显优于次近邻，才能认为匹配可靠。
         if best_distance / second_distance >= ratio_threshold:
             continue
-
         # 双向一致性检查：第二张图中的点也必须将该点视为最近邻。
         reverse_index = best_match_index(second_points[best_index], first_points)
         if reverse_index != first_index:
             continue
-
         first_angle = first_points[first_index]["angle"]
         second_angle = second_points[best_index]["angle"]
         angle_difference = first_angle - second_angle
@@ -85,7 +75,6 @@ def match_keypoints(first_points, second_points, ratio_threshold=0.82):
             angle_difference = -angle_difference
         if angle_difference > 180.0:
             angle_difference = 360.0 - angle_difference
-
         candidate_matches.append({
             "first_index": first_index,
             "second_index": best_index,
@@ -125,7 +114,6 @@ def match_keypoints(first_points, second_points, ratio_threshold=0.82):
     matches.sort(key=lambda match: match["distance"])
     return matches[:40]
 
-
 def match_color(index):
     # 每对匹配点使用相同颜色，使两张结果图可以相互对应。
     blue = 40 + (index * 97) % 216
@@ -133,13 +121,11 @@ def match_color(index):
     red = 40 + (index * 149) % 216
     return blue, green, red
 
-
 def set_pixel(image, y, x, color):
     if 0 <= y < len(image) and 0 <= x < len(image[0]):
         image[y][x][0] = color[0]
         image[y][x][1] = color[1]
         image[y][x][2] = color[2]
-
 
 def draw_circle(image, center_y, center_x, radius, color):
     inner = (radius - 2) * (radius - 2)
@@ -150,12 +136,10 @@ def draw_circle(image, center_y, center_x, radius, color):
             if inner <= distance2 <= outer:
                 set_pixel(image, center_y + dy, center_x + dx, color)
 
-
 def draw_cross(image, center_y, center_x, radius, color):
     for offset in range(-radius, radius + 1):
         set_pixel(image, center_y, center_x + offset, color)
         set_pixel(image, center_y + offset, center_x, color)
-
 
 def visualize_matches(first_image, second_image, first_points, second_points, matches):
     for index in range(len(matches)):
@@ -169,7 +153,6 @@ def visualize_matches(first_image, second_image, first_points, second_points, ma
         draw_cross(first_image, first["original_y"], first["original_x"], radius // 2, color)
         draw_circle(second_image, second["original_y"], second["original_x"], radius, color)
         draw_cross(second_image, second["original_y"], second["original_x"], radius // 2, color)
-
 
 def write_match_report(path, first_points, second_points, matches):
     # 文本表记录两张图中的对应坐标及描述子距离，方便逐项核对。
@@ -189,16 +172,13 @@ def write_match_report(path, first_points, second_points, matches):
                 + str(round(match["angle_difference"], 2)) + "\n"
             )
 
-
 def manual_sift_match(first_path, second_path, first_output, second_output, report_path):
-    # 按题目要求，OpenCV 只用于读取和保存图像。
     first_image = cv2.imread(first_path)
     second_image = cv2.imread(second_path)
     if first_image is None:
         raise FileNotFoundError("Cannot read image: " + first_path)
     if second_image is None:
         raise FileNotFoundError("Cannot read image: " + second_path)
-
     first_points = extract_keypoints(first_image)
     second_points = extract_keypoints(second_image)
     matches = match_keypoints(first_points, second_points)
@@ -210,7 +190,6 @@ def manual_sift_match(first_path, second_path, first_output, second_output, repo
         raise OSError("Cannot write image: " + second_output)
     write_match_report(report_path, first_points, second_points, matches)
     return len(first_points), len(second_points), matches
-
 
 if __name__ == "__main__":
     script_dir = __file__.replace("\\", "/").rsplit("/", 1)[0]
