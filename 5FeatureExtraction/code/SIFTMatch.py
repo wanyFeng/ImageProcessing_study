@@ -174,7 +174,7 @@ def visualize_matches(first_image, second_image, first_points, second_points, ma
 def write_match_report(path, first_points, second_points, matches):
     # 文本表记录两张图中的对应坐标及描述子距离，方便逐项核对。
     with open(path, "w", encoding="utf-8") as report:
-        report.write("序号,planet_x,planet_y,rain_x,rain_y,描述子距离,方向差\n")
+        report.write("序号,front_x,front_y,left_x,left_y,描述子距离,方向差\n")
         for index in range(len(matches)):
             match = matches[index]
             first = first_points[match["first_index"]]
@@ -215,16 +215,16 @@ def manual_sift_match(first_path, second_path, first_output, second_output, repo
 if __name__ == "__main__":
     script_dir = __file__.replace("\\", "/").rsplit("/", 1)[0]
     feature_dir = script_dir + "/.."
-    planet_path = feature_dir + "/planet.jpg"
-    rain_path = feature_dir + "/rain.jpg"
-    planet_output = feature_dir + "/planet_matches.jpg"
-    rain_output = feature_dir + "/rain_matches.jpg"
+    front_path = feature_dir + "/work_front.jpg"
+    left_path = feature_dir + "/work_left.jpg"
+    front_output = feature_dir + "/work_front_matches.jpg"
+    left_output = feature_dir + "/work_left_matches.jpg"
     report_output = feature_dir + "/sift_matches.csv"
 
-    planet_count, rain_count, matches = manual_sift_match(
-        planet_path, rain_path, planet_output, rain_output, report_output
+    front_count, left_count, matches = manual_sift_match(
+        front_path, left_path, front_output, left_output, report_output
     )
-    print("planet keypoints:", planet_count)
-    print("rain keypoints:", rain_count)
+    print("work_front keypoints:", front_count)
+    print("work_left keypoints:", left_count)
     print("reliable matches:", len(matches))
-    print("results saved to:", planet_output, "and", rain_output)
+    print("results saved to:", front_output, "and", left_output)
