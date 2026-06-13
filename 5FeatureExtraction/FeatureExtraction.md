@@ -8,25 +8,25 @@
 - 最终算法流程
     - 高斯滤波去噪
 
-    ```math
+```math
     G(x)=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{x^2}{2\sigma^2}}
-    ```
+```
 
     - 求梯度
   
-    ```math
+```math
     G_x  G_y
-    ```
+```
 
-    ```math
+```math
     M=\sqrt{G_x^2+G_y^2}
-    ```
+```
 
     梯度方向
 
-    ```math
+```math
     \theta=\tan^{-1}\left(\frac{G_y}{G_x}\right)
-    ```
+```
 
     - 非极大值抑制
     比较该像素点和其梯度正负方向的像素点的梯度强度，如果该点梯度强度最大就保留，否则抑制（置0）
@@ -34,21 +34,21 @@
  
     强边缘：
 
-    ```math
+```math
     M>TH
-    ```
+```
 
     弱边缘：
 
-    ```math
+```math
     TL<M<TH
-    ```
+```
 
     噪声：
 
-    ```math
+```math
     M<TL
-    ```
+```
 
     - 滞后阈值连接
     若弱边缘与强边缘相连则保留，否则删除
@@ -58,25 +58,25 @@
     - Sobel求导向量： $[-1\quad0\quad1]$
     - Sobel X算子
   
-    ```math
+```math
     G_x=
     \begin{bmatrix}
     -1 & 0 & 1 \\
     -2 & 0 & 2 \\
     -1 & 0 & 1
     \end{bmatrix}
-    ```
+```
 
     - Sobel Y算子
 
-    ```math
+```math
     G_y=
     \begin{bmatrix}
     -1 & -2 & -1 \\
     0 & 0 & 0 \\
     1 & 2 & 1
     \end{bmatrix}
-    ```
+```
 
 处理流程：
 1. 将 BGR 彩色图像转换为灰度图。
