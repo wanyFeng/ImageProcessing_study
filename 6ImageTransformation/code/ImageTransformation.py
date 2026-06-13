@@ -1,156 +1,156 @@
 import cv2
+import numpy as np
 import math
+from pathlib import Path
 
 
-def invert_matrix(matrix):
-    # 手写 3x3 矩阵求逆。
-    a, b, c = matrix[0]
-    d, e, f = matrix[1]
-    g, h, i = matrix[2]
+def bilinear_interpolation(img, x, y):
+    h, w, _ = img.shape
 
-    determinant = (
-        a * (e * i - f * h)
-        - b * (d * i - f * g)
-        + c * (d * h - e * g)
-    )
-    if abs(determinant) < 0.00000001:
-        raise ValueError("Transformation matrix is not invertible.")
+    if x < 0 or x > w - 1 or y < 0 or y > h - 1:
+        return np.array([255, 255, 255], dtype=np.uint8)
 
-    return [
-        [(e * i - f * h) / determinant, (c * h - b * i) / determinant,
-         (b * f - c * e) / determinant],
-        [(f * g - d * i) / determinant, (a * i - c * g) / determinant,
-         (c * d - a * f) / determinant],
-        [(d * h - e * g) / determinant, (b * g - a * h) / determinant,
-         (a * e - b * d) / determinant],
-    ]
+    x1 = int(math.floor(x))
+    y1 = int(math.floor(y))
+    x2 = min(x1 + 1, w - 1)
+    y2 = min(y1 + 1, h - 1)
 
+    dx = x - x1
+    dy = y - y1
 
-def make_white_canvas(input_path):
-    # 再读取一次原图作为画布，再逐像素填充成白色。
-    canvas = cv2.imread(input_path)
-    if canvas is None:
-        raise FileNotFoundError("Cannot read image: " + input_path)
-    for y in range(len(canvas)):
-        for x in range(len(canvas[0])):
-            canvas[y][x][0] = 255
-            canvas[y][x][1] = 255
-            canvas[y][x][2] = 255
-    return canvas
+    p1 = img[y1, x1].astype(float)
+    p2 = img[y1, x2].astype(float)
+    p3 = img[y2, x1].astype(float)
+    p4 = img[y2, x2].astype(float)
+
+    value = (1 - dx) * (1 - dy) * p1 + \
+            dx * (1 - dy) * p2 + \
+            (1 - dx) * dy * p3 + \
+            dx * dy * p4
+
+    return np.clip(value, 0, 255).astype(np.uint8)
 
 
-def bilinear_sample(image, source_x, source_y):
-    height = len(image)
-    width = len(image[0])
-    if source_x < 0 or source_y < 0 or source_x >= width - 1 or source_y >= height - 1:
-        return None
-
-    x0 = int(source_x)
-    y0 = int(source_y)
-    x1 = x0 + 1
-    y1 = y0 + 1
-    weight_x = source_x - x0
-    weight_y = source_y - y0
-
-    color = [0, 0, 0]
-    for channel in range(3):
-        top = image[y0][x0][channel] * (1.0 - weight_x) + image[y0][x1][channel] * weight_x
-        bottom = image[y1][x0][channel] * (1.0 - weight_x) + image[y1][x1][channel] * weight_x
-        value = top * (1.0 - weight_y) + bottom * weight_y
-        color[channel] = int(value + 0.5)
-    return color
+def inverse_matrix(M):
+    return np.linalg.inv(M)
 
 
-def render_transformed_image(source, canvas, matrix):
-    # 使用逆向映射遍历画布，避免正向映射产生空洞。
-    inverse = invert_matrix(matrix)
-    canvas_height = len(canvas)
-    canvas_width = len(canvas[0])
+def transform_image(img, M, out_h, out_w):
+    result = np.ones((out_h, out_w, 3), dtype=np.uint8) * 255
+    inv_M = inverse_matrix(M)
 
-    for output_y in range(canvas_height):
-        for output_x in range(canvas_width):
-            homogeneous_x = (
-                inverse[0][0] * output_x
-                + inverse[0][1] * output_y
-                + inverse[0][2]
-            )
-            homogeneous_y = (
-                inverse[1][0] * output_x
-                + inverse[1][1] * output_y
-                + inverse[1][2]
-            )
-            homogeneous_w = (
-                inverse[2][0] * output_x
-                + inverse[2][1] * output_y
-                + inverse[2][2]
-            )
-            if abs(homogeneous_w) < 0.00000001:
+    for y_new in range(out_h):
+        for x_new in range(out_w):
+            new_pos = np.array([x_new, y_new, 1])
+            old_pos = inv_M @ new_pos
+
+            if abs(old_pos[2]) < 1e-10:
                 continue
 
-            source_x = homogeneous_x / homogeneous_w
-            source_y = homogeneous_y / homogeneous_w
-            color = bilinear_sample(source, source_x, source_y)
-            if color is not None:
-                canvas[output_y][output_x][0] = color[0]
-                canvas[output_y][output_x][1] = color[1]
-                canvas[output_y][output_x][2] = color[2]
+            old_x = old_pos[0] / old_pos[2]
+            old_y = old_pos[1] / old_pos[2]
+
+            result[y_new, x_new] = bilinear_interpolation(img, old_x, old_y)
+
+    return result
 
 
-def similarity_matrix(scale, angle_degrees, translate_x, translate_y):
-    angle = math.radians(angle_degrees)
-    cosine = math.cos(angle)
-    sine = math.sin(angle)
-    return [
-        [scale * cosine, -scale * sine, translate_x],
-        [scale * sine, scale * cosine, translate_y],
-        [0.0, 0.0, 1.0],
-    ]
+def expand_transform_to_fit(img, M, padding=20):
+    h, w, _ = img.shape
+    corners = np.array([
+        [0, 0, 1],
+        [w - 1, 0, 1],
+        [w - 1, h - 1, 1],
+        [0, h - 1, 1]
+    ], dtype=float).T
+
+    transformed_corners = M @ corners
+    transformed_corners /= transformed_corners[2]
+
+    min_x = math.floor(np.min(transformed_corners[0])) - padding
+    max_x = math.ceil(np.max(transformed_corners[0])) + padding
+    min_y = math.floor(np.min(transformed_corners[1])) - padding
+    max_y = math.ceil(np.max(transformed_corners[1])) + padding
+
+    translation = np.array([
+        [1, 0, -min_x],
+        [0, 1, -min_y],
+        [0, 0, 1]
+    ], dtype=float)
+
+    adjusted_M = translation @ M
+    out_w = max_x - min_x + 1
+    out_h = max_y - min_y + 1
+
+    return transform_image(img, adjusted_M, out_h, out_w)
 
 
-def save_comparison(input_path, output_path, transformed_matrix):
-    source = cv2.imread(input_path)
-    if source is None:
-        raise FileNotFoundError("Cannot read image: " + input_path)
-    canvas = make_white_canvas(input_path)
+def similarity_matrix(angle, scale, tx, ty):
+    rad = math.radians(angle)
 
-    # 左侧显示缩小后的原图，右侧显示几何变换结果。
-    original_matrix = [
-        [0.42, 0.0, 15.0],
-        [0.0, 0.42, 185.0],
-        [0.0, 0.0, 1.0],
-    ]
-    render_transformed_image(source, canvas, original_matrix)
-    render_transformed_image(source, canvas, transformed_matrix)
+    M = np.array([
+        [scale * math.cos(rad), -scale * math.sin(rad), tx],
+        [scale * math.sin(rad),  scale * math.cos(rad), ty],
+        [0, 0, 1]
+    ], dtype=float)
 
-    if not cv2.imwrite(output_path, canvas):
-        raise OSError("Cannot write image: " + output_path)
+    return M
 
 
-def run_all_transformations(input_path, output_directory):
-    # 相似变换：只包含等比例缩放、旋转和平移。
-    similarity = similarity_matrix(0.38, -16.0, 345.0, 200.0)
+def affine_matrix():
+    M = np.array([
+        [1.0, 0.3, 80],
+        [0.2, 1.0, 50],
+        [0, 0, 1]
+    ], dtype=float)
 
-    # 仿射变换：加入不同方向缩放与错切，平行线仍保持平行。
-    affine = [
-        [0.43, 0.12, 335.0],
-        [-0.06, 0.38, 220.0],
-        [0.0, 0.0, 1.0],
-    ]
+    return M
 
-    # 单应变换：最后一行引入透视分量，可模拟近大远小效果。
-    homography = [
-        [0.56, 0.06, 330.0],
-        [0.04, 0.52, 170.0],
-        [0.00035, 0.00018, 1.0],
-    ]
 
-    save_comparison(input_path, output_directory + "/similarity_result.jpg", similarity)
-    save_comparison(input_path, output_directory + "/affine_result.jpg", affine)
-    save_comparison(input_path, output_directory + "/homography_result.jpg", homography)
+def homography_matrix():
+    M = np.array([
+        [1.0, 0.2, 60],
+        [0.1, 1.0, 40],
+        [0.0008, 0.0006, 1]
+    ], dtype=float)
 
+    return M
+
+
+def put_on_white_canvas(original, transformed, filename):
+    h1, w1, _ = original.shape
+    h2, w2, _ = transformed.shape
+
+    canvas_h = max(h1, h2) + 80
+    canvas_w = w1 + w2 + 120
+
+    canvas = np.ones((canvas_h, canvas_w, 3), dtype=np.uint8) * 255
+
+    canvas[40:40 + h1, 40:40 + w1] = original
+    canvas[40:40 + h2, 80 + w1:80 + w1 + w2] = transformed
+
+    cv2.imwrite(filename, canvas)
 
 if __name__ == "__main__":
-    script_directory = __file__.replace("\\", "/").rsplit("/", 1)[0]
-    image_directory = script_directory + "/.."
-    run_all_transformations(image_directory + "/rain.jpg", image_directory)
-    print("Similarity, affine, and homography results have been saved.")
+    image_directory = Path(__file__).resolve().parent.parent
+    img = cv2.imread(str(image_directory / "rain.jpg"))
+
+    if img is None:
+        print("图片读取失败")
+        exit()
+    # 1. 相似变换：旋转 + 缩放 + 平移
+    M_similarity = similarity_matrix(angle=25, scale=0.8, tx=100, ty=80)
+    result_similarity = expand_transform_to_fit(img, M_similarity)
+    put_on_white_canvas(img, result_similarity, str(image_directory / "similarity_result.jpg"))
+
+    # 2. 仿射变换
+    M_affine = affine_matrix()
+    result_affine = expand_transform_to_fit(img, M_affine)
+    put_on_white_canvas(img, result_affine, str(image_directory / "affine_result.jpg"))
+
+    # 3. 单应变换
+    M_homography = homography_matrix()
+    result_homography = expand_transform_to_fit(img, M_homography)
+    put_on_white_canvas(img, result_homography, str(image_directory / "homography_result.jpg"))
+
+    print("处理完成！")
