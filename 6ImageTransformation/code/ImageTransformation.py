@@ -25,6 +25,7 @@ def bilinear_interpolation(img, x, y):
     p2 = img[y1, x2].astype(float)
     p3 = img[y2, x1].astype(float)
     p4 = img[y2, x2].astype(float)
+    ##根据距离进行权值分配，计算插值结果。
     value = (
         (1 - dx) * (1 - dy) * p1
         + dx * (1 - dy) * p2
@@ -39,12 +40,10 @@ def inverse_matrix(M):
 
 def transform_image(img, M, out_h, out_w):
     """根据变换矩阵对图像执行逆向映射。
-
     参数:
         img: 原始图像。
         M: 3×3 图像变换矩阵。
         out_h, out_w: 输出图像的高度和宽度。
-
     返回:
         完成变换后的图像。
     """
@@ -60,7 +59,6 @@ def transform_image(img, M, out_h, out_w):
             old_x = old_pos[0] / old_pos[2]
             old_y = old_pos[1] / old_pos[2]
             result[y_new, x_new] = bilinear_interpolation(img, old_x, old_y)
-
     return result
 
 def expand_transform_to_fit(img, M, padding=20):
