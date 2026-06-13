@@ -57,6 +57,7 @@
     - Sobel平滑向量： $[1\quad2\quad1]$
     - Sobel求导向量： $[-1\quad0\quad1]$
     - Sobel X算子
+  
     ```math
     G_x=
     \begin{bmatrix}
