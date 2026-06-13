@@ -11,6 +11,12 @@ $$
 G(p) = \frac{1}{2\pi\sigma^2} e^{-\frac{\|p-q\|^2}{2\sigma^2}} 
 $$
 
+**高斯滤波运行结果**
+
+| 原图 | 高斯滤波结果 |
+| --- | --- |
+| ![高斯滤波原图](code/bear.jpg) | ![高斯滤波结果](code/gaussian_result.jpg) |
+
 # 非线性滤波
 ### 中值滤波
 将每个像素的值替换为其周围像素的中值，对椒盐噪声尤其有用，因为它不依赖于领域内与典型值差别很大的值，而且噪声部分很难选上
@@ -33,3 +39,9 @@ $$
 $$ 
 BF = \frac{1}{W_q} \sum_{p \in S} \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right) \cdot I_p, \quad W_q = \sum_{p \in S} \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right) 
 $$
+
+**双边滤波运行结果**
+
+| 原图 | 双边滤波结果 |
+| --- | --- |
+| ![双边滤波原图](code/bear.jpg) | ![双边滤波结果](code/bilateral_result.jpg) |
