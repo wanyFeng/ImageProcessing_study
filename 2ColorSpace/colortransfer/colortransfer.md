@@ -10,18 +10,18 @@ RGB->XYZ->Lab(矩阵＋立方根映射)
 ①RGB->LMS->log LMS->lαβ（视锥矩阵+对数映射+正交旋转矩阵）
 去相关效果更好，常用于色彩迁移和自然场景分析  
 ②色彩匹配  
-对源图像 $S$ 的每一个通道（$c \in \{l, \alpha, \beta\}$），执行缩放和平移，以匹配目标图像 $T$ 的均值 $\langle c \rangle$ 与标准差 $\sigma_c$：
+对源图像 $`S`$ 的每一个通道（$`c \in \{l, \alpha, \beta\}`$），执行缩放和平移，以匹配目标图像 $`T`$ 的均值 $`\langle c \rangle`$ 与标准差 $`\sigma_c`$：
 
 ```math
 c_{\text{new}} = \frac{\sigma_{T, c}}{\sigma_{S, c}} \left( c_S - \langle c_S \rangle \right) + \langle c_T \rangle
 ```
 
-*   $(c_S - \langle c_S \rangle)$：使源图色彩中心归零，去除其原本的整体色调。
-*   乘以 $\frac{\sigma_{T, c}}{\sigma_{S, c}}$：将源图色彩通道的动态范围（对比度/饱和度）缩放到目标图相同的程度。
-*   加上 $\langle c_T \rangle$：将源图中心整体移动到目标图的色调中心，使其“染上”目标图的氛围。
+*   $`(c_S - \langle c_S \rangle)`$：使源图色彩中心归零，去除其原本的整体色调。
+*   乘以 $`\frac{\sigma_{T, c}}{\sigma_{S, c}}`$：将源图色彩通道的动态范围（对比度/饱和度）缩放到目标图相同的程度。
+*   加上 $`\langle c_T \rangle`$：将源图中心整体移动到目标图的色调中心，使其“染上”目标图的氛围。
 
 
-③反向转换（$l\alpha\beta$ $\rightarrow$ RGB）
+③反向转换（$`l\alpha\beta`$ $`\rightarrow`$ RGB）
 
 为了能够将处理后的图像重新保存和显示，需要进行严格的数学逆运算：
 
