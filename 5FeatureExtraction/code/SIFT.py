@@ -167,9 +167,11 @@ def is_edge_response(dog, y, x, edge_limit=10.0):
     dxy = (dog[y + 1][x + 1] - dog[y + 1][x - 1]
            - dog[y - 1][x + 1] + dog[y - 1][x - 1]) * 0.25
     determinant = dxx * dyy - dxy * dxy
+    # 主曲率比值过大时，说明该点沿边缘方向变化剧烈，容易受噪声干扰，不稳定。
     if determinant <= 0:
         return True
     trace = dxx + dyy
+    # 主曲率比值过大时，说明该点沿边缘方向变化剧烈，容易受噪声干扰，不稳定。
     limit = (edge_limit + 1.0) * (edge_limit + 1.0) / edge_limit
     return trace * trace / determinant >= limit
 
@@ -232,7 +234,6 @@ def create_descriptor(image, y, x, main_angle):
             index = (cell_y * 4 + cell_x) * 8 + direction_bin
             weight = math.exp(-(dx * dx + dy * dy) / 128.0)
             descriptor[index] += magnitude * weight
-
     # 第一次归一化后截断过大的分量，降低强光和局部高对比度的影响。
     norm = 0.0
     for value in descriptor:
@@ -259,7 +260,7 @@ def detect_sift_keypoints(gaussian_pyramid, dog_pyramid, contrast_threshold=3.0)
         gaussians = gaussian_pyramid[octave]
         height = len(dogs[0])
         width = len(dogs[0][0])
-        border = 9
+        border = 9 #防止后面创建描述子空间的时候访问越界。
         for scale in range(1, len(dogs) - 1):
             for y in range(border, height - border):
                 for x in range(border, width - border):
