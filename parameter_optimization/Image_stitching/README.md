@@ -20,17 +20,11 @@ $$
 
 线性模型：
 
-$$
-h_\theta(x_1, x_2, \dots, x_{n-1})
-= \theta_0 + \theta_1 x_1 + \cdots + \theta_{n-1} x_{n-1}
-$$
+$$h_\theta(x_1, x_2, \dots, x_{n-1}) = \theta_0 + \theta_1 x_1 + \cdots + \theta_{n-1} x_{n-1}$$
 
 批量形式（m 个样本，n-1 维特征）：
 
-$$
-h_i = \theta_0 + \theta_1 x_{i,1} + \theta_2 x_{i,2}
-+ \cdots + \theta_{n-1} x_{i,n-1}
-$$
+$$h_i = \theta_0 + \theta_1 x_{i,1} + \theta_2 x_{i,2} + \cdots + \theta_{n-1} x_{i,n-1}$$
 
 矩阵形式：
 
@@ -52,13 +46,7 @@ $$
 
 进一步展开：
 
-$$
-J(\theta)
-= \theta^T X^T X \theta
-- \theta^T X^T Y
-- Y^T X \theta
-+ Y^T Y
-$$
+$$J(\theta) = \theta^T X^T X \theta - \theta^T X^T Y - Y^T X \theta + Y^T Y$$
 
 向量求导基本公式：
 
@@ -72,10 +60,7 @@ $$
 
 损失函数对 $\theta$ 求导：
 
-$$
-\frac{\partial J(\theta)}{\partial \theta}
-= 2X^T X \theta - 2X^T Y
-$$
+$$\frac{\partial J(\theta)}{\partial \theta} = 2X^T X \theta - 2X^T Y$$
 
 令导数为 0，可得：
 
@@ -98,11 +83,7 @@ $$
 
 岭回归目标函数：
 
-$$
-w = \arg\min_{\mathbf{w}}
-\frac{1}{n} \sum_{i=1}^{n} (x_i^T \mathbf{w} - y_i)^2
-+ \lambda \|\mathbf{w}\|_2^2
-$$
+$$w = \arg\min_{\mathbf{w}} \frac{1}{n} \sum_{i=1}^{n} (x_i^T \mathbf{w} - y_i)^2 + \lambda \|\mathbf{w}\|_2^2$$
 
 闭式解：
 
