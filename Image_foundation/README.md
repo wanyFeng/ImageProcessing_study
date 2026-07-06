@@ -1,4 +1,4 @@
-# ImageProcessing Study
+# ImageProcessing_foundation Study
 
 一个使用 Python、NumPy 和 OpenCV 学习数字图像处理的实践仓库。
 
