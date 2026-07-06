@@ -1,68 +1,63 @@
-# 图像拼接
+## 图像拼接
 
-本文件夹实现两张具有重叠区域图像的自动拼接实验。代码复用了 `Image_foundation/5FeatureExtraction/code` 中已经手写完成的 SIFT 特征点提取和匹配模块，本实验重点放在最小二乘法求解仿射变换、图像反向映射和融合。
+大致思路：
 
-## 文件说明
+① 对每幅图进行特征点提取  
+② 对特征点进行匹配  
+③ 进行图像配准  
+④ 把图像拷贝到另一幅图像特定位置  
+⑤ 对重叠边界进行特殊处理
 
-```text
-Image_stitching/
-├── image_stitching.py          # 图像拼接主程序
-├── README.md                   # 实验说明与运行结果
-├── test_pair/
-│   ├── 001.png                 # 第一张测试图
-│   └── 002.png                 # 第二张测试图
-├── stitched_result.jpg         # 最终拼接结果
-├── matches_visualization.jpg   # 匹配点可视化结果
-└── matches.csv                 # 匹配点坐标和距离记录
-```
+这里提取特征点（SIFT）和特征点匹配都在前面实现过，因此重点在最小二乘法求仿射变换的矩阵，最后融合两张图。
 
-## 基本思路
+- 最小二乘法
+  - 最小二乘法损失函数：$L = \sum_{i=1}^{n} \left( y_i - f(x_i) \right)^2$
+    - 线性模型：$h_\theta(x_1, x_2, \dots, x_{n-1}) = \theta_0 + \theta_1 x_1 + \cdots + \theta_{n-1} x_{n-1}$
+    - 批量形式（m 个样本，n-1 维特征）：$h_i = \theta_0 + \theta_1 x_{i,1} + \theta_2 x_{i,2} + \cdots + \theta_{n-1} x_{i,n-1}$
+    - 矩阵形式：$h = X\theta$
+  - 损失函数矩阵形式：$J(\theta) = \|h - Y\|^2 = \|X\theta - Y\|^2$
+    - 展开：$J(\theta) = (X\theta - Y)^T (X\theta - Y)$
+    - 进一步展开：$J(\theta) = \theta^T X^T X \theta - \theta^T X^T Y - Y^T X \theta + Y^T Y$
+    - 向量求导基本公式
+      - $\frac{\partial (x^T a)}{\partial x} = a$
+      - $\frac{\partial (x^T A x)}{\partial x} = A x + A^T x$
+  - 损失函数对 $\theta$ 求导
+    - $\frac{\partial J(\theta)}{\partial \theta}= 2X^T X \theta - 2X^T Y$
+    - $X^T X \theta = X^T Y$ => $\theta = (X^T X)^{-1} X^T Y$
+  - 几何意义
+    - 求解 b 在 A 的列向量空间的投影
+    - X 代表 A 的列向量的线性组合，这里 X 是 $\theta$，A 的列向量代表 n-1 维的特征值
 
-1. 对两张图分别进行 SIFT 特征点提取。
-2. 对特征描述子进行匹配，得到两张图中的对应点。
-3. 根据匹配点构造仿射变换方程。
-4. 使用最小二乘法求解仿射变换参数。
-5. 将第二张图反向映射到第一张图所在坐标系。
-6. 对重叠区域做简单平均融合，并保存拼接结果。
+- 岭回归与 L2 正则化（加入先验概率分布）
+  - $w= \arg\min_{\mathbf{w}}\frac{1}{n} \sum_{i=1}^{n} (x_i^T \mathbf{w} - y_i)^2+ \lambda \|\mathbf{w}\|_2^2$
+  - 闭式解：$\mathbf{w} = (X X^T + \lambda I)^{-1} X y$
 
-## 最小二乘仿射模型
+## 本次代码实现与运行结果
 
-设第二张图中的匹配点为 `(x, y)`，第一张图中对应点为 `(x', y')`，仿射模型为：
+代码文件：`parameter_optimization/Image_stitching/image_stitching.py`
 
-```text
-x' = a0 * x + a1 * y + a2
-y' = a3 * x + a4 * y + a5
-```
-
-每一组匹配点可以写成两行线性方程：
-
-```text
-[x y 1 0 0 0] [a0 a1 a2 a3 a4 a5]^T = x'
-[0 0 0 x y 1] [a0 a1 a2 a3 a4 a5]^T = y'
-```
-
-多组匹配点堆叠后得到 `A p = b`，使用正规方程求解：
-
-```text
-p = (A^T A)^(-1) A^T b
-```
-
-## 运行方式
-
-在仓库根目录执行：
+运行命令：
 
 ```bash
 python parameter_optimization/Image_stitching/image_stitching.py
 ```
 
-程序默认读取：
+默认输入：
 
 - `parameter_optimization/Image_stitching/test_pair/001.png`
 - `parameter_optimization/Image_stitching/test_pair/002.png`
 
-## 运行结果
+默认输出：
 
-本次测试输出：
+- `stitched_result.jpg`：最终拼接图
+- `matches_visualization.jpg`：匹配点可视化结果
+- `matches.csv`：匹配点坐标、描述子距离和方向差
+
+最终图像拼接结果：
+
+![图像拼接结果](stitched_result.jpg)
+
+终端运行结果：
 
 ```text
 first keypoints: 140
@@ -73,18 +68,13 @@ affine matrix:
 [[ 9.66349651e-01  2.99531332e-02 -1.30867818e+02]
  [-3.58230561e-02  9.19037952e-01 -4.55041940e+02]
  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00]]
+saved: D:\research\parameter_optimization\Image_stitching\stitched_result.jpg
 ```
 
-其中可靠匹配点为 `23` 对，满足题目要求的大于 `10` 对匹配点；经过平移一致性筛选后，使用 `12` 对内点参与最小二乘求解。
+说明：
 
-最终拼接结果：
-
-![图像拼接结果](stitched_result.jpg)
-
-匹配点可视化：
-
-![匹配点可视化](matches_visualization.jpg)
-
-## 实现限制
-
-按照题目要求，代码中 OpenCV 主要用于图像读取和图像编码保存；NumPy 用于矩阵计算。特征点提取和匹配复用了前面手写的 SIFT 代码，图像变换、反向映射、双线性插值和融合部分没有调用 OpenCV 的拼接或仿射变换函数。
+- 第一张图检测到 `140` 个 SIFT 特征点。
+- 第二张图检测到 `140` 个 SIFT 特征点。
+- 可靠匹配点为 `23` 对，满足题目要求的“大于 10 对匹配点”。
+- 经过平移一致性筛选后，使用 `12` 对内点参与仿射矩阵最小二乘求解。
+- 最终拼接结果保存为 `stitched_result.jpg`。
