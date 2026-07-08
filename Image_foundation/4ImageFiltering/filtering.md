@@ -1,47 +1,58 @@
 # 线性滤波
+
 ### 方框滤波
+
 卷积核是全为1的矩阵，每个点的值是周围所有点像素值之和。
+
 ### 均值滤波
-在方框滤波的情况下求均值得到每个点的值。  
-缺点：不能很好的保护图像细节，在去噪时也破坏了图像细节部分，使图像变得模糊。          
+
+在方框滤波的情况下求均值得到每个点的值。
+缺点：不能很好的保护图像细节，在去噪时也破坏了图像细节部分，使图像变得模糊。
+
 ### 高斯滤波
+
 将中心点的权重值加大，远离中心点的权值减小，在q为中心的窗口中，某一点p在高斯滤波中的权重计算方法：
 
-$$ 
-G(p) = \frac{1}{2\pi\sigma^2} e^{-\frac{\|p-q\|^2}{2\sigma^2}} 
+$$
+G(p) = \frac{1}{2\pi\sigma^2} e^{-\frac{\|p-q\|^2}{2\sigma^2}}
 $$
 
 **高斯滤波运行结果**
 
-| 原图 | 高斯滤波结果 |
-| --- | --- |
-| ![高斯滤波原图](code/bear.jpg) | ![高斯滤波结果](code/gaussian_result.jpg) |
+| 原图                                 | 高斯滤波结果                                    |
+| ------------------------------------ | ----------------------------------------------- |
+| ![高斯滤波原图](code/bear_noisy.jpg) | ![高斯滤波结果](code/gaussian_noisy_result.jpg) |
 
 # 非线性滤波
+
 ### 中值滤波
+
 将每个像素的值替换为其周围像素的中值，对椒盐噪声尤其有用，因为它不依赖于领域内与典型值差别很大的值，而且噪声部分很难选上
+
 ### 双边滤波
+
 一些滤波器再去除噪声的同时会模糊掉图像边缘，为了一定程度上保留边缘，可以选择双边滤波，它是一种保边去噪的滤波方法，它同时考虑了空间距离和颜色差异两个因素：
+
 - 空间域权重：与高斯滤波类似，距离越近权重越高
 - 值域权重：颜色差异越小权重越高
-将像素值权重表示为 $G_r$ ,空间距离权重表示为 $G_s$ 。
-  
-$$ 
-G_s = \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) 
+  将像素值权重表示为 $G_r$ ,空间距离权重表示为 $G_s$ 。
+
+$$
+G_s = \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right)
 $$
 
-$$ 
-G_r = \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right) 
+$$
+G_r = \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right)
 $$
 
 则滤波器BF， $W_q$ 为像素值加权和，用于归一化：
 
-$$ 
-BF = \frac{1}{W_q} \sum_{p \in S} \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right) \cdot I_p, \quad W_q = \sum_{p \in S} \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right) 
+$$
+BF = \frac{1}{W_q} \sum_{p \in S} \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right) \cdot I_p, \quad W_q = \sum_{p \in S} \exp\left(-\frac{\|p - q\|^2}{2\sigma_s^2}\right) \exp\left(-\frac{\|I_p - I_q\|^2}{2\sigma_r^2}\right)
 $$
 
 **双边滤波运行结果**
 
-| 原图 | 双边滤波结果 |
-| --- | --- |
-| ![双边滤波原图](code/bear.jpg) | ![双边滤波结果](code/bilateral_result.jpg) |
+| 原图                                 | 双边滤波结果-+                                   |
+| ------------------------------------ | ------------------------------------------------ |
+| ![双边滤波原图](code/bear_noisy.jpg) | ![双边滤波结果](code/bilateral_noisy_result.jpg) |

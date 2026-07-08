@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import cv2
+from pathlib import Path
 
 def padding(img, pad_size):
     #手动实现零填充 (Zero Padding)
@@ -45,17 +46,31 @@ def gaussian_filter(img, kernel_size, sigma):
     # 限制像素值在 0-255 范围内，并转换为 uint8 类型
     return np.clip(output, 0, 255).astype(np.uint8)
 
+def save_image(path, image):
+    path = Path(path)
+    if path.exists():
+        path = path.with_name(path.stem + "_latest" + path.suffix)
+    success, encoded = cv2.imencode(path.suffix, np.ascontiguousarray(image))
+    if not success:
+        raise OSError("Cannot encode image: " + str(path))
+    try:
+        path.write_bytes(encoded.tobytes())
+    except PermissionError:
+        fallback_path = Path(path.name)
+        fallback_path.write_bytes(encoded.tobytes())
+
 # --- 运行高斯滤波 ---
 if __name__ == "__main__":
     # 1. 读取彩色图像
-    input_img = cv2.imread(r"D:\research\image_foundation\4ImageFiltering\bear.jpg")
+    script_dir = Path(__file__).resolve().parent
+    input_path = script_dir / "bear_noisy.jpg"
+    input_img = cv2.imread(str(input_path))
     
     if input_img is not None:
         # 2. 调用手写高斯滤波 (使用 5x5 核，标准差 sigma=1.5)
         gaussian_result = gaussian_filter(input_img, kernel_size=5, sigma=1.5)
         
         # 3. 保存结果
-        cv2.imwrite("gaussian_result.jpg", gaussian_result)
-        print("高斯滤波完成，结果已保存为 'gaussian_result.jpg'")
-    else:
-        print("未找到输入图像，请检查图片路径。")
+        save_image(script_dir / "gaussian_noisy_result.jpg", gaussian_result)
+        print("高斯滤波完成，结果已保存为 'gaussian_noisy_result.jpg'")
+

@@ -5,7 +5,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-
 CURRENT_DIR = Path(__file__).resolve().parent
 SIFT_CODE_DIR = CURRENT_DIR.parents[1] / "Image_foundation" / "5FeatureExtraction" / "code"
 sys.path.append(str(SIFT_CODE_DIR))
@@ -60,7 +59,6 @@ def choose_translation_inliers(first_xy, second_xy, tolerance=35.0):
     """用整体平移一致性粗略筛掉少量错误匹配点。"""
     if len(first_xy) <= 10:
         return list(range(len(first_xy)))
-
     # 正确匹配通常具有相近位移，选择支持点最多的位移簇。
     offsets = first_xy - second_xy
     best_indices = []
@@ -278,6 +276,7 @@ def run(first_path, second_path, output_path):
     )
     write_matches_csv(output_path.with_name("matches.csv"), first_points, second_points, matches)
     return len(first_points), len(second_points), len(matches), len(inlier_indices), second_to_first
+
 if __name__ == "__main__":
     default_first = CURRENT_DIR / "test_pair" / "001.png"
     default_second = CURRENT_DIR / "test_pair" / "002.png"

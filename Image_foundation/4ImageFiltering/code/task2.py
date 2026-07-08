@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import cv2
+from pathlib import Path
 
 def padding(img, pad_size):
     #手动实现零填充 (Zero Padding)
@@ -50,16 +51,29 @@ def bilateral_filter(img, kernel_size, sigma_s, sigma_r):
                 output[i, j, ch] = np.sum(roi[:, :, ch] * normalized_kernel)        
     return np.clip(output, 0, 255).astype(np.uint8)
 
+def save_image(path, image):
+    path = Path(path)
+    if path.exists():
+        path = path.with_name(path.stem + "_latest" + path.suffix)
+    success, encoded = cv2.imencode(path.suffix, np.ascontiguousarray(image))
+    if not success:
+        raise OSError("Cannot encode image: " + str(path))
+    try:
+        path.write_bytes(encoded.tobytes())
+    except PermissionError:
+        fallback_path = Path(path.name)
+        fallback_path.write_bytes(encoded.tobytes())
+
 # --- 运行双边滤波 ---
 if __name__ == "__main__":
     # 1. 读取彩色图像
-    input_img = cv2.imread(r"D:\research\image_foundation\4ImageFiltering\bear.jpg") # 请替换为您的测试图片路径
+    script_dir = Path(__file__).resolve().parent
+    input_path = script_dir / "bear_noisy.jpg"
+    input_img = cv2.imread(str(input_path))
     
     if input_img is not None:
-        # 2. 调用手写双边滤波 (使用 5x5 核，空间标准差=3.0，颜色标准差=30.0)
-        bilateral_result = bilateral_filter(input_img, kernel_size=5, sigma_s=3.0, sigma_r=30.0)
+        # 2. 调用手写双边滤波。适当增大 sigma_r，让同一区域内的噪声更容易被平滑。
+        bilateral_result = bilateral_filter(input_img, kernel_size=7, sigma_s=4.0, sigma_r=75.0)
         # 3. 保存结果
-        cv2.imwrite("bilateral_result.jpg", bilateral_result)
-        print("双边滤波完成，结果已保存为 'bilateral_result.jpg'")
-    else:
-        print("未找到输入图像，请检查图片路径。")
+        save_image(script_dir / "bilateral_noisy_result.jpg", bilateral_result)
+        print("双边滤波完成，结果已保存为 'bilateral_noisy_result.jpg'")
