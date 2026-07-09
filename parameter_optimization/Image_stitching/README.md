@@ -1,126 +1,110 @@
-## 图像拼接
+# 图像拼接
 
-大致思路：
+本实验实现两张图像的基础拼接。代码复用前面手写的 SIFT 特征提取与匹配结果，再用最小二乘法估计两张图之间的仿射变换，最后完成图像变换和融合。
 
-1. 对每幅图进行特征点提取。
-2. 对特征点进行匹配。
-3. 进行图像配准。
-4. 把图像拷贝到另一幅图像特定位置。
-5. 对重叠边界进行特殊处理。
+## 实验目标
 
-这里特征点提取（SIFT）和特征点匹配都在前面实现过，因此本实验重点在用最小二乘法求仿射变换矩阵，最后融合两张图。
+给定两张有重叠区域的图片：
 
-## 最小二乘法
+```text
+001.png
+002.png
+```
 
-最小二乘法损失函数：
+程序需要自动找到它们之间的对应点，并把两张图拼成一张更宽视野的图。
 
-$$
-L = \sum_{i=1}^{n} \left( y_i - f(x_i) \right)^2
-$$
-
-线性模型：
-
-$$h_\theta(x_1, x_2, \dots, x_{n-1}) = \theta_0 + \theta_1 x_1 + \cdots + \theta_{n-1} x_{n-1}$$
-
-批量形式（m 个样本，n-1 维特征）：
-
-$$h_i = \theta_0 + \theta_1 x_{i,1} + \theta_2 x_{i,2} + \cdots + \theta_{n-1} x_{i,n-1}$$
-
-矩阵形式：
-
-$$
-h = X\theta
-$$
-
-损失函数矩阵形式：
-
-$$
-J(\theta) = \|h - Y\|^2 = \|X\theta - Y\|^2
-$$
-
-展开：
-
-$$
-J(\theta) = (X\theta - Y)^T (X\theta - Y)
-$$
-
-进一步展开：
-
-$$J(\theta) = \theta^T X^T X \theta - \theta^T X^T Y - Y^T X \theta + Y^T Y$$
-
-向量求导基本公式：
-
-$$
-\frac{\partial (x^T a)}{\partial x} = a
-$$
-
-$$
-\frac{\partial (x^T A x)}{\partial x} = A x + A^T x
-$$
-
-损失函数对 $\theta$ 求导：
-
-$$\frac{\partial J(\theta)}{\partial \theta} = 2X^T X \theta - 2X^T Y$$
-
-令导数为 0，可得：
-
-$$
-X^T X \theta = X^T Y
-$$
-
-因此：
-
-$$
-\theta = (X^T X)^{-1} X^T Y
-$$
-
-几何意义：
-
-- 求解 $b$ 在 $A$ 的列向量空间中的投影。
-- $X$ 表示 $A$ 的列向量的线性组合；这里 $X$ 是 $\theta$，$A$ 的列向量代表特征值。
-
-## 岭回归与 L2 正则化
-
-岭回归目标函数：
-
-$$w = \arg\min_{\mathbf{w}} \frac{1}{n} \sum_{i=1}^{n} (x_i^T \mathbf{w} - y_i)^2 + \lambda \|\mathbf{w}\|_2^2$$
-
-闭式解：
-
-$$
-\mathbf{w} = (X X^T + \lambda I)^{-1} X y
-$$
-
-## 本次代码实现与运行结果
+## 当前代码流程
 
 代码文件：
 
 ```text
-parameter_optimization/Image_stitching/image_stitching.py
+image_stitching.py
 ```
 
-运行命令：
+主要流程：
+
+```text
+1. 读取两张输入图片
+2. 调用 SIFTMatch.extract_keypoints 提取 SIFT 特征点
+3. 调用 SIFTMatch.match_keypoints 匹配描述子
+4. 根据整体平移一致性筛掉部分错误匹配
+5. 用最小二乘法估计第二张图到第一张图的仿射矩阵
+6. 计算能容纳两张图的新画布
+7. 把第一张图放到画布中
+8. 反向映射第二张图，使用双线性插值采样
+9. 对重叠区域做 50% 平均融合
+10. 裁剪多余黑边并保存结果
+```
+
+## 运行方式
+
+在仓库根目录运行：
 
 ```bash
-python parameter_optimization/Image_stitching/image_stitching.py
+python imageProcessing_study/parameter_optimization/Image_stitching/image_stitching.py
 ```
 
 默认输入：
 
-- `parameter_optimization/Image_stitching/test_pair/001.png`
-- `parameter_optimization/Image_stitching/test_pair/002.png`
+```text
+test_pair/001.png
+test_pair/002.png
+```
 
 默认输出：
 
-- `stitched_result.jpg`：最终拼接图。
-- `matches_visualization.jpg`：匹配点可视化结果。
-- `matches.csv`：匹配点坐标、描述子距离和方向差。
+```text
+stitched_result.jpg
+matches_visualization.jpg
+matches.csv
+```
 
-最终图像拼接结果：
+## 输出文件说明
 
-![图像拼接结果](stitched_result.jpg)
+- `stitched_result.jpg`：最终拼接结果
+- `matches_visualization.jpg`：匹配点可视化，用于检查匹配质量
+- `matches.csv`：匹配点坐标、描述子距离和方向差
 
-终端运行结果：
+## 关键函数
+
+### `matched_points`
+
+把匹配结果中的索引转换成两张图片里的真实像素坐标。
+
+### `choose_translation_inliers`
+
+根据匹配点的整体平移是否一致，粗略筛掉离群匹配点。
+
+### `solve_affine_least_squares`
+
+根据匹配点求仿射变换矩阵。
+
+仿射变换形式：
+
+```text
+x' = a0 x + a1 y + a2
+y' = a3 x + a4 y + a5
+```
+
+每一对匹配点提供两个方程，多对点组合成线性方程组，再用最小二乘法求解。
+
+### `warp_and_blend_second`
+
+把第二张图片映射到新画布上。这里使用反向映射：
+
+```text
+画布坐标 -> 反算第二张图坐标 -> 双线性插值取颜色
+```
+
+这样可以减少正向映射导致的空洞。
+
+### `crop_black_border`
+
+根据有效像素的 mask 裁剪掉拼接后周围多余的黑色区域。
+
+## 当前运行结果
+
+一次典型运行结果：
 
 ```text
 first keypoints: 140
@@ -131,13 +115,33 @@ affine matrix:
 [[ 9.66349651e-01  2.99531332e-02 -1.30867818e+02]
  [-3.58230561e-02  9.19037952e-01 -4.55041940e+02]
  [ 0.00000000e+00  0.00000000e+00  1.00000000e+00]]
-saved: D:\research\parameter_optimization\Image_stitching\stitched_result.jpg
 ```
 
 说明：
 
-- 第一张图检测到 `140` 个 SIFT 特征点。
-- 第二张图检测到 `140` 个 SIFT 特征点。
-- 可靠匹配点为 `23` 对，满足题目要求的“大于 10 对匹配点”。
-- 经过平移一致性筛选后，使用 `12` 对内点参与仿射矩阵最小二乘求解。
-- 最终拼接结果保存为 `stitched_result.jpg`。
+- 两张图各保留了 140 个 SIFT 特征点。
+- 初步得到 23 对可靠匹配点。
+- 经过平移一致性筛选后，使用 12 对内点估计仿射矩阵。
+- 匹配点数量大于 10，满足本实验的基本要求。
+
+## 最小二乘法在这里做什么
+
+图像拼接中，最小二乘法用于根据多对匹配点求一个“整体最合适”的仿射变换。
+
+因为匹配点可能有噪声，不可能每一对点都完全满足同一个变换，所以程序寻找一个矩阵，使所有点的整体误差尽量小。
+
+简化理解：
+
+```text
+很多对匹配点都在投票：
+第二张图应该怎么平移、旋转、缩放，才能尽量对齐第一张图？
+```
+
+最小二乘法给出的就是这个整体最合适的答案。
+
+## 注意事项
+
+- 当前代码适合两张图之间近似满足仿射变换的情况。
+- 如果视角变化很大，应该使用单应矩阵而不是仿射矩阵。
+- 如果匹配点错误较多，可以进一步加入 RANSAC。
+- 拼接融合目前是简单平均融合，接缝处可能仍然可见。

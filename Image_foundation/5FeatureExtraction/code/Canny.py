@@ -101,7 +101,7 @@ def sobel_gradient(image):
                 direction[y][x] = 135
     return magnitude, direction
 
-def non_maximum_suppression(magnitude, direction):
+def non_maximum_suppression(magnitude, direction):                                          
     # 仅保留梯度方向上的局部最大值，使检测到的边缘变细。
     height = len(magnitude)
     width = len(magnitude[0])
