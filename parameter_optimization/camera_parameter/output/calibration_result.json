@@ -1,4 +1,13 @@
 {
+  "method": "handwritten_zhang_initialization_and_lm_optimization",
+  "opencv_usage": [
+    "cv2.imread",
+    "cv2.cvtColor",
+    "cv2.findChessboardCorners",
+    "cv2.cornerSubPix",
+    "cv2.drawChessboardCorners",
+    "cv2.imwrite"
+  ],
   "valid_images": [
     "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-1.jpg",
     "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-2.jpg",
@@ -19,17 +28,17 @@
     6
   ],
   "square_size": 1.0,
-  "rms_reprojection_error": 3.0600303974509586,
+  "rms_reprojection_error": 2.163768244675198,
   "camera_matrix": [
     [
-      1458.9488587599985,
+      1458.948862123844,
       0.0,
-      834.2438181353184
+      834.2438915357842
     ],
     [
       0.0,
-      1471.740117316282,
-      674.1053055741884
+      1471.7401271649615,
+      674.1053603734467
     ],
     [
       0.0,
@@ -38,129 +47,296 @@
     ]
   ],
   "distortion_coefficients": [
-    0.15695222391002436,
-    -1.4294926535475048,
-    -0.0006479059636913862,
-    0.0016259883215875603,
-    2.0209076593363675
+    0.15695233773159978,
+    -1.429493343925008,
+    -0.0006478951373701839,
+    0.0016259980829431869,
+    2.020908859051943
+  ],
+  "initial_camera_matrix": [
+    [
+      1706.0,
+      0.0,
+      853.0
+    ],
+    [
+      0.0,
+      1706.0,
+      639.5
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "initial_distortion_coefficients": [
+    -0.0633532580133945,
+    -0.22319198841465784,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "per_image_reprojection_errors": [
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-1.jpg",
+      "rmse": 5.267379556092875,
+      "mean_error": 4.7338286382546775,
+      "max_error": 9.600728842321896
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-2.jpg",
+      "rmse": 3.48634612129953,
+      "mean_error": 3.0954577214196046,
+      "max_error": 7.2478734892526555
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-3.jpg",
+      "rmse": 2.102935229412997,
+      "mean_error": 1.9483022474885354,
+      "max_error": 4.142534905193993
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-4.jpg",
+      "rmse": 2.163911971722652,
+      "mean_error": 1.9839795590450466,
+      "max_error": 3.6565063778538702
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-5.jpg",
+      "rmse": 2.095092519732775,
+      "mean_error": 1.8855530494335093,
+      "max_error": 5.034761777955213
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-6.jpg",
+      "rmse": 2.807185202792272,
+      "mean_error": 2.6090024800225673,
+      "max_error": 4.778293631586423
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-7.jpg",
+      "rmse": 2.8511290011748343,
+      "mean_error": 2.587195546378201,
+      "max_error": 5.982984404637831
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-8.jpg",
+      "rmse": 2.303380396604267,
+      "mean_error": 2.1135020982231087,
+      "max_error": 5.309668582721479
+    },
+    {
+      "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-9.jpg",
+      "rmse": 3.092753913946702,
+      "mean_error": 2.8142079436631584,
+      "max_error": 6.378974497203058
+    }
   ],
   "extrinsics": [
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-1.jpg",
       "rotation_vector": [
-        -0.38860355642224687,
-        -0.3946909098021232,
-        1.454738387465867
+        -0.3886035224999944,
+        -0.3946909914109313,
+        1.454738376106195
       ],
       "translation_vector": [
-        1.3444509454859972,
-        -2.180185330511833,
-        12.718938136161311
+        1.344450359572362,
+        -2.180185815438615,
+        12.718938086564544
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-2.jpg",
       "rotation_vector": [
-        -0.17799950088010197,
-        -0.11956002808420227,
-        1.5548037516871542
+        -0.17799946716431608,
+        -0.11956009462733463,
+        1.5548037516655044
       ],
       "translation_vector": [
-        1.3793588318596623,
-        -2.3651762118875737,
-        11.470652262542055
+        1.3793582788607348,
+        -2.365176633470925,
+        11.470652226257785
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-3.jpg",
       "rotation_vector": [
-        -0.47049508986818506,
-        0.14945964841690385,
-        0.2929326173007436
+        -0.4704950651435972,
+        0.14945959971760658,
+        0.2929326045919355
       ],
       "translation_vector": [
-        -2.1898364691508965,
-        -4.362290060442654,
-        13.102205493302021
+        -2.1898371298770525,
+        -4.362290527509254,
+        13.10220534535212
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-4.jpg",
       "rotation_vector": [
-        0.06552862782221067,
-        -0.289858396545523,
-        -0.13228552970090526
+        0.06552868253620701,
+        -0.28985844815223416,
+        -0.13228553553863762
       ],
       "translation_vector": [
-        -2.516012455533861,
-        -1.8144587691919631,
-        8.952046777903087
+        -2.5160128970700093,
+        -1.8144590902324387,
+        8.95204661986628
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-5.jpg",
       "rotation_vector": [
-        0.16024999719856606,
-        0.37555958318179905,
-        0.09889896777882315
+        0.1602500418582881,
+        0.3755595297088638,
+        0.09889897833748747
       ],
       "translation_vector": [
-        -4.063070023264401,
-        -2.6858813415659974,
-        12.751730599249582
+        -4.063070664181819,
+        -2.685881819610934,
+        12.7517303632913
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-6.jpg",
       "rotation_vector": [
-        -0.7054493678283994,
-        -0.02160463746774447,
-        -0.02324796940789421
+        -0.7054493367893331,
+        -0.021604681490209922,
+        -0.02324799069041787
       ],
       "translation_vector": [
-        -3.5330994410766237,
-        -3.5702535826617194,
-        12.188408146366566
+        -3.533100057610421,
+        -3.570254011258431,
+        12.188407951121002
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-7.jpg",
       "rotation_vector": [
-        0.2956853329927112,
-        -0.09762405309351635,
-        -0.007823480775313108
+        0.2956853976620272,
+        -0.09762410927442011,
+        -0.007823474220439879
       ],
       "translation_vector": [
-        -3.795937414266347,
-        -2.0514177789037027,
-        9.736879823841042
+        -3.795937886358118,
+        -2.0514181185047535,
+        9.73687953066541
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-8.jpg",
       "rotation_vector": [
-        -0.5016322344095322,
-        -0.3130339281510941,
-        0.029257325594910073
+        -0.5016322031751353,
+        -0.3130339727229008,
+        0.02925730249110026
       ],
       "translation_vector": [
-        -1.8492687171987072,
-        -4.052860308378171,
-        11.862132677516094
+        -1.8492693269992861,
+        -4.052860734209028,
+        11.862132569850916
       ]
     },
     {
       "image": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\image\\image-9.jpg",
       "rotation_vector": [
-        -0.7881028245752286,
-        0.04290470449017561,
-        0.02361187578187444
+        -0.7881027923038911,
+        0.04290465980904415,
+        0.023611851343039655
       ],
       "translation_vector": [
-        -3.2022612707146045,
-        -4.31792496534416,
-        13.147170246930488
+        -3.202261942338183,
+        -4.317925424899398,
+        13.1471700410755
       ]
+    }
+  ],
+  "optimization_history": [
+    {
+      "iteration": 0,
+      "rmse": 13.995797771033349,
+      "damping": 0.001
+    },
+    {
+      "iteration": 1,
+      "rmse": 2.70557667724455,
+      "damping": 0.0003333333333333333
+    },
+    {
+      "iteration": 2,
+      "rmse": 2.238001352964612,
+      "damping": 0.0001111111111111111
+    },
+    {
+      "iteration": 3,
+      "rmse": 2.178413987735823,
+      "damping": 3.7037037037037037e-05
+    },
+    {
+      "iteration": 4,
+      "rmse": 2.1669523787727125,
+      "damping": 1.2345679012345678e-05
+    },
+    {
+      "iteration": 5,
+      "rmse": 2.1642242731964854,
+      "damping": 4.115226337448559e-06
+    },
+    {
+      "iteration": 6,
+      "rmse": 2.1638240898079943,
+      "damping": 1.371742112482853e-06
+    },
+    {
+      "iteration": 7,
+      "rmse": 2.1637748125182226,
+      "damping": 4.5724737082761767e-07
+    },
+    {
+      "iteration": 8,
+      "rmse": 2.16376900562101,
+      "damping": 1.5241579027587256e-07
+    },
+    {
+      "iteration": 9,
+      "rmse": 2.1637683322756205,
+      "damping": 5.0805263425290854e-08
+    },
+    {
+      "iteration": 10,
+      "rmse": 2.163768254717246,
+      "damping": 1.6935087808430285e-08
+    },
+    {
+      "iteration": 11,
+      "rmse": 2.1637682458179306,
+      "damping": 5.645029269476761e-09
+    },
+    {
+      "iteration": 12,
+      "rmse": 2.163768244802731,
+      "damping": 1.8816764231589203e-09
+    },
+    {
+      "iteration": 13,
+      "rmse": 2.163768244688569,
+      "damping": 6.272254743863068e-10
+    },
+    {
+      "iteration": 14,
+      "rmse": 2.1637682446763256,
+      "damping": 2.090751581287689e-10
+    },
+    {
+      "iteration": 15,
+      "rmse": 2.1637682446752255,
+      "damping": 6.969171937625631e-11
+    },
+    {
+      "iteration": 16,
+      "rmse": 2.163768244675198,
+      "damping": 2.323057312541877e-11
     }
   ],
   "corner_preview_dir": "D:\\research\\imageProcessing_study\\parameter_optimization\\camera_parameter\\output\\corner_preview"

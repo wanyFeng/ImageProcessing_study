@@ -1,20 +1,18 @@
 # 相机参数标定
 
-本实验使用多张棋盘格图片估计相机参数。当前代码是适合初学者阅读的基础版，重点放在“完整流程能跑通”，复杂的张正友手写推导和非线性优化细节先交给 OpenCV 完成。
+本实验使用多张棋盘格图片估计相机参数。当前版本按照编程实践要求实现：
+
+- 可以使用 OpenCV 读取图像、检测棋盘格角点、保存角点预览图
+- 相机外参、内参和畸变参数求解不调用 `cv2.calibrateCamera`
+- 参数求解、投影模型、重投影误差和非线性最小二乘优化均在代码中手写实现
 
 ## 标定目标
 
-相机标定要回答的问题是：
+相机标定需要估计：
 
-```text
-一个真实世界中的棋盘格角点，为什么会出现在图像中的某个像素位置？
-```
-
-为了描述这个过程，需要估计：
-
-- 内参 `camera_matrix`：相机自身的成像参数，例如焦距和主点位置
-- 畸变参数 `distortion_coefficients`：镜头导致的桶形、枕形等畸变
-- 外参 `extrinsics`：每张图中棋盘格相对相机的位置和姿态
+- 内参 `camera_matrix`：焦距和主点位置
+- 畸变参数 `distortion_coefficients`：径向畸变和切向畸变
+- 外参 `extrinsics`：每张棋盘格图像相对于相机的姿态
 
 ## 当前代码流程
 
@@ -30,11 +28,29 @@ camera_calibration.py
 1. 读取 image/ 文件夹中的标定图片
 2. 使用 cv2.findChessboardCorners 检测棋盘格内角点
 3. 使用 cv2.cornerSubPix 进行亚像素角点精修
-4. 生成棋盘格角点的真实三维坐标
-5. 调用 cv2.calibrateCamera 求解相机参数
-6. 保存 calibration_result.json
-7. 保存角点检测预览图
+4. 手写生成棋盘格角点的真实三维坐标
+5. 手写 DLT 求解每张图的单应矩阵
+6. 根据 Zhang 标定方法手写估计相机内参初值
+7. 根据单应矩阵手写恢复每张图的外参初值
+8. 手写径向畸变初值估计
+9. 手写投影函数、重投影残差和 Levenberg-Marquardt 非线性最小二乘优化
+10. 保存 calibration_result.json 和角点预览图
 ```
+
+## OpenCV 使用范围
+
+本实验中 OpenCV 只用于：
+
+```text
+cv2.imread
+cv2.cvtColor
+cv2.findChessboardCorners
+cv2.cornerSubPix
+cv2.drawChessboardCorners
+cv2.imwrite
+```
+
+没有调用 `cv2.calibrateCamera`、`cv2.projectPoints` 或 `cv2.Rodrigues` 完成参数求解。
 
 ## 输入数据
 
@@ -59,7 +75,7 @@ image-9.jpg
 9 x 6
 ```
 
-注意这里说的是“内角点”数量，不是棋盘格黑白方块数量。
+这里指的是内角点数量，不是黑白方块数量。
 
 ## 运行方式
 
@@ -79,7 +95,7 @@ python imageProcessing_study/parameter_optimization/camera_parameter/camera_cali
 
 - `--pattern-cols`：每行内角点数量
 - `--pattern-rows`：每列内角点数量
-- `--square-size`：棋盘格每个方格的真实边长，单位可自定
+- `--square-size`：棋盘格每个方格的真实边长，单位可自行定义
 - `--image-dir`：标定图片文件夹
 - `--output-dir`：结果输出文件夹
 
@@ -102,14 +118,14 @@ output/
 有效标定图片数量：9
 图像尺寸：1706 x 1279
 棋盘格内角点：9 x 6
-RMS 重投影误差：3.06003 px
+RMS 重投影误差：2.163768 px
 ```
 
 相机内参矩阵：
 
 ```text
-[[1458.9489,    0.0000,  834.2438],
- [   0.0000, 1471.7401,  674.1053],
+[[1458.9489,    0.0000,  834.2439],
+ [   0.0000, 1471.7401,  674.1054],
  [   0.0000,    0.0000,    1.0000]]
 ```
 
@@ -118,5 +134,3 @@ RMS 重投影误差：3.06003 px
 ```text
 [0.15695, -1.42949, -0.00065, 0.00163, 2.02091]
 ```
-
-
